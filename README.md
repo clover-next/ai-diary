@@ -1,46 +1,96 @@
-# AI-Diary (AI日記)
+# AI-Diary (AI日記) 🤖📔
 
-プライバシー重視の、完全オフライン対応エモーショナル日記アプリ。
+> **Produced by Clover Next**
+> 
+> プライバシー重視の、完全オフライン対応エモーショナル日記アプリ。
+> インターネットにデータを送信することなく、あなたのデバイス上でAIが寄り添います。
 
-## 🌟 概要
-「Wordless-Diary」は、日々の感情を記録し、AI（ローカルLLM）との対話を通じて自分自身を客観的に見つめ直すためのアプリです。
-インターネットにデータを送信することなく、デバイス上ですべての処理を行うため、究極のプライバシーを確保しています。
+---
 
-## ✨ 特徴
-- **完全オフラインAI**: スマホ内で動作するローカルLLM（Gemma-3 1B）を搭載。
-- **音声対話 (Live Consultation)**: Qwen3-TTSエンジンの音声合成による、寄り添うような対話体験。
-- **感情の可視化**: その日の気分を色とアイコンで記録し、カレンダー形式で振り返り。
-- **プライバシーファースト**: 全ての日記・対話データはスマホ内（SQLite）にのみ保存されます。
+## 🌟 プロジェクト概要
+「AI-Diary」は、日々の感情を記録し、AI（ローカルLLM）との対話を通じて自分自身を客観的に見つめ直すための次世代日記アプリです。
+最先端のオンデバイスAI技術を駆使し、究極のプライバシーとリアルタイムな対話体験を両立しました。
 
-## 🚀 セットアップ
-本プロジェクトは Expo (React Native) とネイティブモジュール (llama.cpp) で構成されています。
+### ✨ 主要機能
+- **🧠 完全オフライン推論 (Gemma-3 1B)**
+  - 外部サーバーを一切使用せず、デバイス内でAIが思考します。あなたの秘密は完全に守られます。
+- **🎙️ エモーショナル音声対話 (Qwen3-TTS)**
+  - 「Ono_Anna」ボイスによる、温かみのある音声合成。テキストだけでなく、耳からも癒やしを。
+- **📊 感情のカレンダー・ビジュアライズ**
+  - その日の気分を色とアイコンで記録。過去の自分を美しく振り返ることができます。
+- **🔐 プライバシー・ファースト**
+  - 全ての履歴はローカルのSQLiteデータベースにのみ保存されます。
 
-### 1. 依存関係のインストール
+---
+
+## 🏗 システム構成
+「AI-Diary」は多層的なアーキテクチャで構成されており、React Nativeによる俊敏なUIと、C++ (llama.cpp) による強力な演算を組み合わせています。
+
+```mermaid
+graph TD
+    subgraph "React Native Layer (TypeScript)"
+        UI[User Interface] --> Store[Zustand Store]
+        Store --> DB[(SQLite Local DB)]
+        Store --> AIS[AI Service]
+    end
+
+    subgraph "Native Layer (Kotlin/C++)"
+        AIS --> Bridge[JNI Bridge]
+        Bridge --> Llama[llama.cpp Engine]
+        Llama --> LLM_File["llm_model.gguf (Gemma-3 1B)"]
+        Llama --> TTS_File["tts_model.gguf (Qwen3-TTS)"]
+    end
+
+    UI --> |Voice Out| TTS[Custom TTS Module]
+    TTS_File --> TTS
+```
+
+---
+
+## 🛠 技術スタック
+| カテゴリ | 技術 |
+| :--- | :--- |
+| **Framework** | React Native (Expo) |
+| **Language** | TypeScript |
+| **AI Engine** | native `llama.cpp` (Android JNI Bridge) |
+| **LLM Model** | Gemma-3 1B IT (Quantized INT4) |
+| **TTS Model** | Qwen3-TTS 0.6B |
+| **Database** | SQLite (expo-sqlite) |
+| **State** | Zustand |
+
+---
+
+## 🚀 クイックスタート
+
+### 1. リポジトリのクローンとインストール
 ```bash
+git clone https://github.com/clover-next/ai-diary.git
+cd ai-diary
 npm install
 ```
 
-### 2. ネイティブプロジェクトの生成
+### 2. ネイティブバイナリの生成 (Android)
 ```bash
 npx expo prebuild
 ```
 
 ### 3. AIモデルの準備
-アプリ起動時に自動ダウンロードされますが、手動で配置する場合は以下のファイルを `files` ディレクトリに保存してください。
-- `llm_model.gguf` (思考用)
-- `tts_model.gguf` (音声用)
+本リポジトリにはAIモデル本体は含まれていません（GitHubのファイルサイズ制限のため）。
+以下のスクリプトを実行してダウンロードするか、手動で `models/` ディレクトリに配置してください。
 
-## 🛠 技術スタック
-- **Frontend**: React Native (Expo)
-- **State**: Zustand
-- **Database**: SQLite (expo-sqlite)
-- **AI Engine**: native llama.cpp (JNI Bridge)
-- **Design**: Clover Next Custom Theme
-
-## ⚖️ 免責事項・著作権
-- 本ソフトウェアは **Clover Next** によって提供されています。
-- 使用されているAIモデル（Gemma-3, Qwen-TTS）の著作権は、それぞれの権利者に帰属します。
-- 本アプリの著作権は **Clover Next** に帰属します。
+```bash
+setup_models.bat
+```
 
 ---
-Produced by **Clover Next**
+
+## ⚖️ 免責事項・著作権
+- 本ソフトウェアおよびデザインの著作権は **Clover Next** に帰属します。
+- 使用されている各AIモデルの著作権は、それぞれの開発元（Google, Alibaba等）に帰属します。
+- 本アプリは医療機器ではなく、カウンセリングの代替を意図したものではありません。
+
+---
+<p align="center">
+  <b>Clover Next - 未来を拓く、穏やかなテクノロジー</b><br>
+  Copyright © 2026 Clover Next All Rights Reserved.
+</p>
