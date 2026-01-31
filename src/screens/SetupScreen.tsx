@@ -1,11 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, TextInput } from 'react-native';
-import { theme } from '../theme';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useAppStore } from '../store/useAppStore';
-import { useAppStore } from '../store/useAppStore';
-import { documentDirectory, cacheDirectory, createDownloadResumable, getInfoAsync } from 'expo-file-system';
+import * as FileSystem from 'expo-file-system';
 import { aiService } from '../services/AIService';
 
 const VOICES = [
@@ -30,12 +24,12 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
         setIsDownloading(true);
 
         const MODEL_URL = 'https://huggingface.co/lmstudio-community/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf';
-        const dir = documentDirectory || cacheDirectory || '';
+        const dir = FileSystem.documentDirectory || FileSystem.cacheDirectory || '';
         const fileUri = dir + (dir.endsWith('/') ? '' : '/') + 'model.gguf';
 
         try {
             // First check if file already exists (Manual Bundling Support)
-            const info = await getInfoAsync(fileUri);
+            const info = await FileSystem.getInfoAsync(fileUri);
             if (info.exists) {
                 setLoadingText('モデルファイルを検出しました。初期化中...');
                 await aiService.loadModel(fileUri);
@@ -47,7 +41,7 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
             }
 
             console.log("Starting download to:", fileUri);
-            const downloadResumable = createDownloadResumable(
+            const downloadResumable = FileSystem.createDownloadResumable(
                 MODEL_URL,
                 fileUri,
                 {
