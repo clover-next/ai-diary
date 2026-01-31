@@ -76,7 +76,7 @@ npx expo prebuild
 
 ### 3. AIモデルの準備
 本リポジトリにはAIモデル本体は含まれていません（GitHubのファイルサイズ制限のため）。
-以下のスクリプトを実行してダウンロードするか、手動で `models/` ディレクトリに配置してください。
+アプリ内のセットアップ画面で自動ダウンロードされるか、手動で **[Releases](https://github.com/clover-next/ai-diary/releases)** からダウンロードして `models/` ディレクトリに配置してください。
 
 ```bash
 setup_models.bat

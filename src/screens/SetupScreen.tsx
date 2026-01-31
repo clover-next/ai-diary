@@ -29,9 +29,9 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
         setStep(2);
         setIsDownloading(true);
 
-        // PLACEHOLDER URLs - User should replace with real Git Raw URLs
-        const LLM_MODEL_URL = 'https://huggingface.co/lmstudio-community/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf';
-        const TTS_MODEL_URL = 'https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf'; // Placeholder for Qwen3-TTS
+        // Official GitHub Release URLs
+        const LLM_MODEL_URL = 'https://github.com/clover-next/ai-diary/releases/download/ai-models/llm_model.gguf';
+        const TTS_MODEL_URL = 'https://github.com/clover-next/ai-diary/releases/download/ai-models/tts_model.gguf';
 
         const dir = (FileSystem as any).documentDirectory || (FileSystem as any).cacheDirectory || '';
         const llmFileUri = dir + (dir.endsWith('/') ? '' : '/') + 'llm_model.gguf';
