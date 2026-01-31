@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, Easing, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, TextInput } from 'react-native';
 import { theme } from '../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -13,22 +13,13 @@ const VOICES = [
 
 export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
     const { setUserName: saveName, setSelectedVoice: saveVoice, setHasCompletedSetup } = useAppStore();
-    const [step, setStep] = useState(0); // 0: Name, 1: Voice Selection, 2: Download
+    const [step, setStep] = useState(0);
     const [userName, setUserName] = useState('');
     const [selectedVoice, setSelectedVoice] = useState('anna');
     const [progress, setProgress] = useState(0);
     const [loadingText, setLoadingText] = useState('準備中...');
-    const [isDownloading, setIsDownloading] = useState(false);
 
-    const fadeAnim = new Animated.Value(0);
-
-    useEffect(() => {
-        Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-        }).start();
-    }, [step]);
+    const fadeAnim = new Animated.Value(1);
 
     const startDownload = () => {
         setStep(2);
@@ -37,9 +28,9 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
             currentProgress += 0.05;
             setProgress(currentProgress);
 
-            if (currentProgress < 0.3) setLoadingText('AIモデル構成を読み込み中...');
-            else if (currentProgress < 0.6) setLoadingText('Qwen3-TTS 0.6B (TLL) を展開中...');
-            else if (currentProgress < 0.9) setLoadingText('音声エンジンを設定中...');
+            if (currentProgress < 0.3) setLoadingText('オンデバイスAIを準備中...');
+            else if (currentProgress < 0.6) setLoadingText('Qwen3-TTS 0.6B をダウンロード中...');
+            else if (currentProgress < 0.9) setLoadingText('ローカル推論エンジンを設定中...');
             else setLoadingText('まもなく完了します...');
 
             if (currentProgress >= 1) {
@@ -54,14 +45,16 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-                {step === 0 ? (
-                    <>
+            <View style={styles.content}>
+                {step === 0 && (
+                    <View style={styles.stepContainer}>
                         <Text style={styles.title}>ようこそ</Text>
-                        <Text style={styles.subtitle}>AIがあなたをどのようにお呼びすればいいですか？</Text>
+                        <Text style={styles.subtitle}>
+                            AIがあなたをどのようにお呼びすればいいですか？
+                        </Text>
 
                         <View style={styles.inputWrapper}>
-                            <MaterialIcons name="person-outline" size={24} color={theme.colors.text.muted} style={styles.inputIcon} />
+                            <MaterialIcons name="person-outline" size={24} color={theme.colors.text.muted} />
                             <TextInput
                                 style={styles.input}
                                 placeholder="あなたのお名前"
@@ -78,11 +71,19 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
                         >
                             <Text style={styles.buttonText}>次へ</Text>
                         </TouchableOpacity>
-                    </>
-                ) : step === 1 ? (
-                    <>
+                    </View>
+                )}
+
+                {step === 1 && (
+                    <View style={styles.stepContainer}>
                         <Text style={styles.title}>{userName}さん、こんにちは</Text>
-                        <Text style={styles.subtitle}>あなたに寄り添うAIの「声」を選んでください。</Text>
+                        <Text style={styles.subtitle}>
+                            あなたに寄り添うAIの「声」を選んでください。
+                        </Text>
+
+                        <Text style={styles.infoText}>
+                            💎 このAIは完全にオンデバイスで動作します
+                        </Text>
 
                         <View style={styles.voiceGrid}>
                             {VOICES.map((v) => (
@@ -90,14 +91,18 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
                                     key={v.id}
                                     style={[
                                         styles.voiceCard,
-                                        selectedVoice === v.id && { borderColor: v.color, borderWidth: 3 }
+                                        selectedVoice === v.id && {
+                                            borderColor: v.color,
+                                            borderWidth: 3,
+                                            backgroundColor: `${v.color}10`
+                                        }
                                     ]}
                                     onPress={() => setSelectedVoice(v.id)}
                                 >
                                     <View style={[styles.voiceIcon, { backgroundColor: v.color }]}>
                                         <MaterialIcons name="record-voice-over" size={32} color="#fff" />
                                     </View>
-                                    <View>
+                                    <View style={styles.voiceInfo}>
                                         <Text style={styles.voiceName}>{v.name}</Text>
                                         <Text style={styles.voiceDesc}>{v.desc}</Text>
                                     </View>
@@ -108,9 +113,11 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
                         <TouchableOpacity style={styles.mainButton} onPress={startDownload}>
                             <Text style={styles.buttonText}>セットアップ開始</Text>
                         </TouchableOpacity>
-                    </>
-                ) : (
-                    <View style={styles.loadingContainer}>
+                    </View>
+                )}
+
+                {step === 2 && (
+                    <View style={styles.stepContainer}>
                         <Text style={styles.nowLoading}>Now Loading...</Text>
                         <Text style={styles.loadingSubtitle}>{loadingText}</Text>
 
@@ -120,13 +127,20 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
 
                         <Text style={styles.percentage}>{Math.round(progress * 100)}%</Text>
 
-                        <Text style={styles.hint}>
-                            ※この操作は最初の一回だけ必要です。{'\n'}
-                            モデル: Qwen3-TTS 0.6B / メモリ負荷: 約600MB (超軽量)
-                        </Text>
+                        <View style={styles.infoBox}>
+                            <Text style={styles.infoBoxTitle}>🔒 完全オフライン動作</Text>
+                            <Text style={styles.infoBoxText}>
+                                AI推論はすべてあなたのスマホ内で実行されます。{'\n'}
+                                プライバシーが完全に保護されています。
+                            </Text>
+                            <Text style={styles.infoBoxText}>
+                                モデル: Qwen3-TTS 0.6B{'\n'}
+                                メモリ: 約600MB (超軽量)
+                            </Text>
+                        </View>
                     </View>
                 )}
-            </Animated.View>
+            </View>
         </SafeAreaView>
     );
 };
@@ -135,11 +149,15 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.colors.background.primary,
-        justifyContent: 'center',
     },
     content: {
+        flex: 1,
         padding: theme.spacing.xl,
+        justifyContent: 'center',
+    },
+    stepContainer: {
         alignItems: 'center',
+        width: '100%',
     },
     title: {
         fontSize: 28,
@@ -154,6 +172,13 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: theme.spacing.xl,
     },
+    infoText: {
+        fontSize: 14,
+        color: theme.colors.accent.teal,
+        textAlign: 'center',
+        marginBottom: theme.spacing.m,
+        fontWeight: '600',
+    },
     inputWrapper: {
         width: '100%',
         backgroundColor: theme.colors.background.secondary,
@@ -166,13 +191,11 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: theme.colors.background.tertiary,
     },
-    inputIcon: {
-        marginRight: theme.spacing.s,
-    },
     input: {
         flex: 1,
         fontSize: 18,
         color: theme.colors.text.primary,
+        marginLeft: theme.spacing.s,
     },
     voiceGrid: {
         width: '100%',
@@ -185,7 +208,7 @@ const styles = StyleSheet.create({
         marginBottom: theme.spacing.m,
         flexDirection: 'row',
         alignItems: 'center',
-        borderWidth: 3,
+        borderWidth: 2,
         borderColor: 'transparent',
     },
     voiceIcon: {
@@ -195,6 +218,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: theme.spacing.m,
+    },
+    voiceInfo: {
+        flex: 1,
     },
     voiceName: {
         fontSize: 18,
@@ -222,10 +248,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
     },
-    loadingContainer: {
-        alignItems: 'center',
-        width: '100%',
-    },
     nowLoading: {
         fontSize: 32,
         color: theme.colors.accent.teal,
@@ -237,6 +259,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: theme.colors.text.secondary,
         marginBottom: 40,
+        textAlign: 'center',
     },
     progressWrapper: {
         width: '100%',
@@ -254,49 +277,26 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: theme.colors.text.primary,
         fontWeight: 'bold',
+        marginBottom: 30,
     },
-    downloadProgressContainer: {
-        width: '100%',
-        backgroundColor: 'rgba(0, 210, 255, 0.05)',
-        padding: 15,
+    infoBox: {
+        backgroundColor: theme.colors.background.secondary,
+        padding: theme.spacing.l,
         borderRadius: 15,
-        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: theme.colors.accent.teal,
+        width: '100%',
     },
-    downloadStatus: {
-        fontSize: 12,
-        color: theme.colors.text.secondary,
-        textAlign: 'center',
-        marginBottom: 10,
-    },
-    progressBarBg: {
-        height: 8,
-        backgroundColor: theme.colors.background.tertiary,
-        borderRadius: 4,
-        overflow: 'hidden',
-    },
-    progressBarFill: {
-        height: '100%',
-        backgroundColor: theme.colors.accent.teal,
-    },
-    downloadPercentage: {
+    infoBoxTitle: {
         fontSize: 16,
-        fontWeight: 'bold',
         color: theme.colors.accent.teal,
-        textAlign: 'center',
-        marginTop: 8,
+        fontWeight: 'bold',
+        marginBottom: theme.spacing.s,
     },
-    latencyNote: {
-        fontSize: 10,
-        color: theme.colors.text.muted,
-        textAlign: 'center',
-        marginTop: 4,
-        fontStyle: 'italic',
+    infoBoxText: {
+        fontSize: 13,
+        color: theme.colors.text.secondary,
+        lineHeight: 20,
+        marginBottom: theme.spacing.xs,
     },
-    hint: {
-        marginTop: 60,
-        fontSize: 12,
-        color: theme.colors.text.muted,
-        textAlign: 'center',
-        lineHeight: 18,
-    }
 });
