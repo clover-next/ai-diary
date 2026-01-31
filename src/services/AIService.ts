@@ -66,6 +66,19 @@ class NativeAIServiceImpl implements AIService {
         }
     }
 
+    async loadTTSModel(path: string): Promise<boolean> {
+        if (!LlamaAI) return true;
+        try {
+            console.log("Native: Loading TTS from", path);
+            // In a real dual-model setup, this might be a different call if the bridge supports it.
+            // For now, we reuse loadModel to ensure it's loaded into the context.
+            return await LlamaAI.loadModel(path);
+        } catch (e) {
+            console.error("Load TTS model error:", e);
+            return false;
+        }
+    }
+
     async generateResponse(prompt: string, category: string, userName: string = 'あなた'): Promise<string> {
         if (!LlamaAI) return new MockAIService().generateResponse(prompt, category, userName);
         try {
