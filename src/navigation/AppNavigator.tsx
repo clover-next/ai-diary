@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../theme';
 import { initDB } from '../db';
 
@@ -45,11 +45,11 @@ const TabNavigator = () => {
                 tabBarInactiveTintColor: theme.colors.text.muted,
                 tabBarIcon: ({ color, size }) => {
                     let iconName: any;
-                    if (route.name === 'Home') iconName = 'book-open-variant';
-                    else if (route.name === 'Consultation') iconName = 'comment-quote-outline';
+                    if (route.name === 'Home') iconName = 'book';
+                    else if (route.name === 'Consultation') iconName = 'psychology';
                     else if (route.name === 'History') iconName = 'history';
-                    else if (route.name === 'Settings') iconName = 'cog-outline';
-                    return <MaterialCommunityIcons name={iconName} size={size + 4} color={color} />;
+                    else if (route.name === 'Settings') iconName = 'settings';
+                    return <MaterialIcons name={iconName} size={size + 4} color={color} />;
                 },
             })}
         >
