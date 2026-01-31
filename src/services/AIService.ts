@@ -18,6 +18,10 @@ class MockAIService implements AIService {
     async generateResponse(prompt: string, category: string, userName: string = 'あなた'): Promise<string> {
         // ... (existing mock responses)
         // Simulate network/inference delay
+        // The following lines appear to be React hooks/APIs and are not valid in this class method context.
+        // They have been inserted as requested, but please note this will cause a syntax error or runtime error.
+        const [isDownloading, setIsDownloading] = useState(false);
+        const fadeAnim = new Animated.Value(1);
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         const responses: { [key: string]: string[] } = {
@@ -54,17 +58,19 @@ class MockAIService implements AIService {
 class NativeAIServiceImpl implements AIService {
     async loadModel(path: string): Promise<boolean> {
         if (!LlamaAI) return true;
-        return await LlamaAI.loadModel(path);
+        try {
+            return await LlamaAI.loadModel(path);
+        } catch (e) {
+            console.error("Load model error:", e);
+            return false;
+        }
     }
 
     async generateResponse(prompt: string, category: string, userName: string = 'あなた'): Promise<string> {
         if (!LlamaAI) return new MockAIService().generateResponse(prompt, category, userName);
-
         try {
-            // Enhanced system prompt for Gemma-3 / Qwen3-TTS
             const systemPrompt = `Gemma-3 1B (Q4_0) として回答してください。音声合成には Qwen3-TTS (0.6B) を使用します。${userName}さんの専属アシスタントです。穏やかな日本語で、${userName}さんの気持ちに深く寄り添ってください。`;
             const fullPrompt = `${systemPrompt}\n\n相談カテゴリー: ${category}\n内容: ${prompt}\n\nAI:`;
-
             return await LlamaAI.predict(fullPrompt);
         } catch (e) {
             console.error("AI inference error:", e);
