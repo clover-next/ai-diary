@@ -19,7 +19,7 @@ export const VoiceCallScreen = ({ navigation }: any) => {
     useEffect(() => {
         // Initial Greeting
         const timer = setTimeout(() => {
-            handleAIResponse("こんにちは！小野アンナです。今日はお話しできて嬉しいです。何かあったんですか？");
+            handleAIResponse("こんにちは！今日はお話しできて嬉しいです。何かあったんですか？");
         }, 1500);
 
         const callTimer = setInterval(() => {
@@ -55,10 +55,13 @@ export const VoiceCallScreen = ({ navigation }: any) => {
         setAiStatus('お話し中...');
         setIsProcessing(false);
 
+        const voiceId = selectedVoice === 'anna' ? 'ja-jp-x-vsk-local' : selectedVoice === 'ryo' ? 'ja-jp-x-jab-local' : 'ja-jp-x-medium-local';
+
         Speech.speak(text, {
             language: 'ja-JP',
             pitch: 1.1,
             rate: 0.9,
+            voice: voiceId,
             onDone: () => setAiStatus('お話しください...'),
         });
     };
@@ -66,14 +69,17 @@ export const VoiceCallScreen = ({ navigation }: any) => {
     const simulateUserSpeaking = async () => {
         if (isProcessing) return;
 
-        setAiStatus('認識中...');
+        setAiStatus('思考中...');
         setIsProcessing(true);
 
-        // Simulate thinking delay
-        setTimeout(async () => {
-            const response = await aiService.generateResponse("通話での対話", "悩み", userName);
+        try {
+            const response = await aiService.generateResponse("音声通話での相談", "悩み", userName);
             handleAIResponse(response);
-        }, 2000);
+        } catch (e) {
+            console.error(e);
+            setAiStatus('お話しください...');
+            setIsProcessing(false);
+        }
     };
 
     const formatTime = (seconds: number) => {
