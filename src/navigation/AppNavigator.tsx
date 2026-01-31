@@ -67,7 +67,7 @@ const TabNavigator = () => {
 }
 
 export const AppNavigator = () => {
-    const { hasCompletedSetup } = useAppStore();
+    const { hasCompletedSetup, setHasCompletedSetup } = useAppStore();
     const [isAppReady, setIsAppReady] = useState(false);
 
     useEffect(() => {

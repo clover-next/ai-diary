@@ -62,8 +62,7 @@ export const HistoryScreen = () => {
                 <FlashList<DiaryEntry>
                     data={diaries}
                     renderItem={renderItem}
-                    estimatedItemSize={120}
-                    contentContainerStyle={{ padding: theme.spacing.md }}
+                    contentContainerStyle={{ padding: theme.spacing.m }}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.text.primary} />
                     }
