@@ -29,7 +29,7 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
         setIsDownloading(true);
 
         const MODEL_URL = 'https://huggingface.co/lmstudio-community/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf';
-        const fileUri = `${FileSystem.documentDirectory}model.gguf`;
+        const fileUri = (FileSystem.documentDirectory || '') + 'model.gguf';
 
         try {
             const downloadResumable = FileSystem.createDownloadResumable(
