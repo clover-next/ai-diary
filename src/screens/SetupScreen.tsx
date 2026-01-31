@@ -81,6 +81,21 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
                 ) : step === 1 ? (
                     <>
                         <Text style={styles.title}>{userName}さん、こんにちは</Text>
+                        <View style={styles.downloadProgressContainer}>
+                            <Text style={styles.downloadStatus}>
+                                {downloadProgress < 100 ? 'Qwen3-TTS 0.6B (TLL) モデルをダウンロード中...' : '初期化完了'}
+                            </Text>
+                            <View style={styles.progressBarBg}>
+                                <Animated.View
+                                    style={[
+                                        styles.progressBarFill,
+                                        { width: `${downloadProgress}%` }
+                                    ]}
+                                />
+                            </View>
+                            <Text style={styles.downloadPercentage}>{Math.round(downloadProgress)}%</Text>
+                            <Text style={styles.latencyNote}>超低遅延 (97ms) エンジンを最適化しています...</Text>
+                        </View>
                         <Text style={styles.subtitle}>あなたに寄り添うAIの「声」を選んでください。</Text>
 
                         <View style={styles.voiceGrid}>
@@ -253,6 +268,20 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: theme.colors.text.primary,
         fontWeight: 'bold',
+    },
+    downloadPercentage: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: theme.colors.primary,
+        textAlign: 'center',
+        marginTop: 8,
+    },
+    latencyNote: {
+        fontSize: 12,
+        color: theme.colors.text.muted,
+        textAlign: 'center',
+        marginTop: 4,
+        fontStyle: 'italic',
     },
     hint: {
         marginTop: 60,

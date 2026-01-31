@@ -52,9 +52,10 @@ class NativeAIServiceImpl implements AIService {
         if (!NativeAI) return new MockAIService().generateResponse(prompt, category, userName);
 
         try {
-            // Enhanced system prompt with user name personalization
-            const systemPrompt = `あなたは「Wordless Diary」の専属AIです。${userName}さんの良き理解者として、穏やかで客観的な日本語で回答してください。`;
-            const fullPrompt = `${systemPrompt}\n\nユーザーの相談 (${category}): ${prompt}\n\nAIの回答:`;
+            // Enhanced system prompt for Qwen3-TTS (TLL ready)
+            // TLL refers to Text, Link, and Live streaming interaction
+            const systemPrompt = `Qwen3-TTS (0.6B) として回答してください。${userName}さんの専属アシスタントです。穏やかな日本語で、${userName}さんの気持ちに深く寄り添ってください。`;
+            const fullPrompt = `${systemPrompt}\n\n相談カテゴリー: ${category}\n内容: ${prompt}\n\nAI:`;
 
             return await NativeAI.predict(fullPrompt);
         } catch (e) {

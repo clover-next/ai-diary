@@ -81,7 +81,9 @@ export const AppNavigator = () => {
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 {!hasCompletedSetup ? (
-                    <Stack.Screen name="Setup" component={SetupScreen} />
+                    <Stack.Screen name="Setup">
+                        {(props) => <SetupScreen onComplete={() => setHasCompletedSetup(true)} {...props} />}
+                    </Stack.Screen>
                 ) : (
                     <>
                         <Stack.Screen name="Main" component={TabNavigator} />

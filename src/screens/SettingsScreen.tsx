@@ -4,6 +4,7 @@ import { theme } from '../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
+import { useAppStore } from '../store/useAppStore';
 
 const VOICES = [
     { id: 'anna', name: 'アンナ', desc: '明るく遊び心のある声', color: '#FF7E5F', sample: 'こんにちは！今日はどんな一日でしたか？アンナがお聞きしますね。' },

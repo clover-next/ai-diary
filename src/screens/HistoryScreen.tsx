@@ -59,11 +59,11 @@ export const HistoryScreen = () => {
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>履歴</Text>
             <View style={styles.listWrapper}>
-                <FlashList
+                <FlashList<DiaryEntry>
                     data={diaries}
                     renderItem={renderItem}
-                    estimatedItemSize={100}
-                    contentContainerStyle={styles.listContent}
+                    estimatedItemSize={120}
+                    contentContainerStyle={{ padding: theme.spacing.md }}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.text.primary} />
                     }
