@@ -106,6 +106,6 @@ setup_models.bat
 
 ---
 <p align="center">
-  <b>Clover Next - 未来を拓く、穏やかなテクノロジー</b><br>
+  <b>Clover Next - ひらめきの種を、育てる場所。</b><br>
   Copyright © 2026 Clover Next All Rights Reserved.
 </p>
