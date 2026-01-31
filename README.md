@@ -1,5 +1,11 @@
 # AI-Diary (AI日記) 🤖📔
 
+<p align="center">
+  <img src="./assets/logo.png" width="120" height="120" alt="AI-Diary Logo" />
+</p>
+
+![AI-Diary Header Illustration](./assets/header.png)
+
 > **Produced by Clover Next**
 > 
 > プライバシー重視の、完全オフライン対応エモーショナル日記アプリ。
