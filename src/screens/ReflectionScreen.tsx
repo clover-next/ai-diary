@@ -194,8 +194,29 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontWeight: '500',
     },
+    buttonRow: {
+        flexDirection: 'row',
+        marginTop: 30,
+        gap: 15,
+    },
+    actionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: theme.colors.accent.teal,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 25,
+    },
+    callButton: {
+        backgroundColor: theme.colors.accent.pop,
+    },
+    buttonText: {
+        color: '#fff',
+        marginLeft: 8,
+        fontWeight: 'bold',
+    },
     closeButton: {
-        marginTop: theme.spacing.xxl,
+        marginTop: theme.spacing.xl,
         padding: theme.spacing.m,
     },
     closeText: {

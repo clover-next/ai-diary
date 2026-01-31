@@ -18,6 +18,7 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
     const [selectedVoice, setSelectedVoice] = useState('anna');
     const [progress, setProgress] = useState(0);
     const [loadingText, setLoadingText] = useState('準備中...');
+    const [isDownloading, setIsDownloading] = useState(false);
 
     const fadeAnim = new Animated.Value(0);
 
