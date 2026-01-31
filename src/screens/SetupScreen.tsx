@@ -29,62 +29,68 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
         setStep(2);
         setIsDownloading(true);
 
-        const MODEL_URL = 'https://huggingface.co/lmstudio-community/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf';
-        const dir = (FileSystem as any).documentDirectory || (FileSystem as any).cacheDirectory || '';
-        const fileUri = dir + (dir.endsWith('/') ? '' : '/') + 'model.gguf';
+        // PLACEHOLDER URLs - User should replace with real Git Raw URLs
+        const LLM_MODEL_URL = 'https://huggingface.co/lmstudio-community/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf';
+        const TTS_MODEL_URL = 'https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf'; // Placeholder for Qwen3-TTS
 
-        try {
-            // First check if file already exists (Manual Bundling Support)
+        const dir = (FileSystem as any).documentDirectory || (FileSystem as any).cacheDirectory || '';
+        const llmFileUri = dir + (dir.endsWith('/') ? '' : '/') + 'llm_model.gguf';
+        const ttsFileUri = dir + (dir.endsWith('/') ? '' : '/') + 'tts_model.gguf';
+
+        const downloadFile = async (url: string, fileUri: string, label: string) => {
             const info = await FileSystem.getInfoAsync(fileUri);
             if (info.exists) {
-                setLoadingText('モデルファイルを検出しました。初期化中...');
-                await aiService.loadModel(fileUri);
-                saveName(userName);
-                saveVoice(selectedVoice);
-                setHasCompletedSetup(true);
-                setTimeout(onComplete, 1000);
-                return;
+                console.log(`${label} already exists.`);
+                return true;
             }
 
-            console.log("Starting download to:", fileUri);
+            setLoadingText(`${label} を準備中...`);
             const downloadResumable = FileSystem.createDownloadResumable(
-                MODEL_URL,
+                url,
                 fileUri,
-                {
-                    headers: {
-                        'User-Agent': 'WordlessDiary-App/1.0',
-                    }
-                },
+                { headers: { 'User-Agent': 'WordlessDiary-App/1.0' } },
                 (downloadProgress) => {
                     const total = downloadProgress.totalBytesExpectedToWrite;
                     if (total > 0) {
                         const prog = downloadProgress.totalBytesWritten / total;
                         setProgress(prog);
-
-                        if (prog < 0.2) setLoadingText('通信を確立中...');
-                        else if (prog < 0.8) setLoadingText(`${Math.round(prog * 100)}% モデルをダウンロード中...`);
-                        else setLoadingText('まもなく完了します...');
+                        setLoadingText(`${label} をダウンロード中... ${Math.round(prog * 100)}%`);
                     } else {
-                        setLoadingText(`ダウンロード中... (${(downloadProgress.totalBytesWritten / 1024 / 1024).toFixed(1)} MB)`);
+                        setLoadingText(`${label} をダウンロード中... (${(downloadProgress.totalBytesWritten / 1024 / 1024).toFixed(1)} MB)`);
                     }
                 }
             );
 
             const result = await downloadResumable.downloadAsync();
+            return !!(result && result.uri);
+        };
 
-            if (result && result.uri) {
-                setLoadingText('推論エンジンを初期化中...');
-                await aiService.loadModel(result.uri);
+        try {
+            // 1. Download LLM
+            const llmSuccess = await downloadFile(LLM_MODEL_URL, llmFileUri, '思考エンジン (LLM)');
+            if (!llmSuccess) throw new Error('LLMのダウンロードに失敗しました');
 
-                saveName(userName);
-                saveVoice(selectedVoice);
-                setHasCompletedSetup(true);
-                setTimeout(onComplete, 1000);
-            }
+            // 2. Download TTS
+            setProgress(0);
+            const ttsSuccess = await downloadFile(TTS_MODEL_URL, ttsFileUri, '音声エンジン (TTS)');
+            if (!ttsSuccess) throw new Error('TTSのダウンロードに失敗しました');
+
+            setLoadingText('システムを初期化中...');
+            // Initialize main model
+            await aiService.loadModel(llmFileUri);
+
+            // NOTE: If AIService supports loading multiple models, call it here for TTS too.
+            // For now, we ensure both are physically present.
+
+            saveName(userName);
+            saveVoice(selectedVoice);
+            setHasCompletedSetup(true);
+            setTimeout(onComplete, 1000);
+
         } catch (e: any) {
             console.error("Download error:", e);
             const errorMsg = e.message || 'Unknown error';
-            setLoadingText(`エラー: ${errorMsg}\n\n手動で配置する場合は以下へ保存してください:\n${fileUri}`);
+            setLoadingText(`エラー: ${errorMsg}\n\n手動で配置する場合は以下へ保存してください:\n1. ${llmFileUri}\n2. ${ttsFileUri}`);
         } finally {
             setIsDownloading(false);
         }
