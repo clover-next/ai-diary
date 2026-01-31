@@ -6,12 +6,16 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 import { useAppStore } from '../store/useAppStore';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as DocumentPicker from 'expo-document-picker';
+import * as Linking from 'expo-linking';
 import { aiService } from '../services/AIService';
 
 // Fallback for directory if documentDirectory is null/undefined
 const getDocumentDir = () => {
     return FileSystem.documentDirectory || FileSystem.cacheDirectory || 'files/';
 };
+
+const RELEASE_PAGE_URL = 'https://github.com/clover-next/ai-diary/releases/tag/ai-models';
 
 const VOICES = [
     { id: 'anna', name: 'アンナ (Anna)', desc: '明るく遊び心のある声', color: '#FF7E5F' },
@@ -27,8 +31,37 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
     const [progress, setProgress] = useState(0);
     const [loadingText, setLoadingText] = useState('準備中...');
     const [isDownloading, setIsDownloading] = useState(false);
+    const [showManualOptions, setShowManualOptions] = useState(false);
 
     const fadeAnim = new Animated.Value(1);
+
+    const pickAndSaveFile = async (targetFileUri: string, label: string) => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                type: '*/*', // GGUF might not have a standard mime type
+                copyToCacheDirectory: true,
+            });
+
+            if (result.canceled || !result.assets || result.assets.length === 0) return false;
+
+            const selectedFile = result.assets[0];
+            // Basic validation for .gguf extension
+            if (!selectedFile.name.toLowerCase().endsWith('.gguf')) {
+                alert('.ggufファイルを選択してください');
+                return false;
+            }
+
+            setLoadingText(`${label} をコピー中...`);
+            await FileSystem.copyAsync({
+                from: selectedFile.uri,
+                to: targetFileUri
+            });
+            return true;
+        } catch (e) {
+            console.error(`Pick file error for ${label}:`, e);
+            return false;
+        }
+    };
 
     const startDownload = async () => {
         setStep(2);
@@ -96,7 +129,8 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
 
             // Helpful message for manual placement
             const manualPath = llmFileUri.replace('file://', '');
-            setLoadingText(`エラー: ${errorMsg}\n\n【手動解決】PCからモデルを配置する場合、以下の場所（またはアプリ専用フォルダ）にファイルをコピーしてください：\n\n1. llm_model.gguf\n2. tts_model.gguf\n\n保存先目安: ${manualPath}`);
+            setLoadingText(`エラー: ${errorMsg}\n\n【手動解決】PCからモデルを配置するか、以下のボタンからファイルを選択してください：\n\n1. llm_model.gguf\n2. tts_model.gguf\n\n保存先目安: ${manualPath}`);
+            setShowManualOptions(true); // Show the UI for manual picking
         } finally {
             setIsDownloading(false);
         }
@@ -198,6 +232,54 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
                                 合計メモリ: 約1.2GB (超軽量)
                             </Text>
                         </View>
+
+                        {showManualOptions && (
+                            <View style={styles.manualContainer}>
+                                <Text style={styles.manualTitle}>手動セットアップ</Text>
+                                <TouchableOpacity
+                                    style={styles.linkButton}
+                                    onPress={() => Linking.openURL(RELEASE_PAGE_URL)}
+                                >
+                                    <MaterialIcons name="open-in-new" size={20} color={theme.colors.accent.pop} />
+                                    <Text style={styles.linkButtonText}>モデル配布ページを開く</Text>
+                                </TouchableOpacity>
+
+                                <View style={styles.manualActions}>
+                                    <TouchableOpacity
+                                        style={styles.actionButton}
+                                        onPress={async () => {
+                                            const dir = getDocumentDir();
+                                            const uri = dir + (dir.endsWith('/') ? '' : '/') + 'llm_model.gguf';
+                                            if (await pickAndSaveFile(uri, '思考エンジン')) {
+                                                alert('思考エンジンを配置しました');
+                                            }
+                                        }}
+                                    >
+                                        <Text style={styles.actionButtonText}>LLMを選択</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={styles.actionButton}
+                                        onPress={async () => {
+                                            const dir = getDocumentDir();
+                                            const uri = dir + (dir.endsWith('/') ? '' : '/') + 'tts_model.gguf';
+                                            if (await pickAndSaveFile(uri, '音声エンジン')) {
+                                                alert('音声エンジンを配置しました');
+                                            }
+                                        }}
+                                    >
+                                        <Text style={styles.actionButtonText}>TTSを選択</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <TouchableOpacity
+                                    style={styles.retryButton}
+                                    onPress={startDownload}
+                                >
+                                    <Text style={styles.retryButtonText}>配置完了・再試行</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
                 )}
             </View>
@@ -358,5 +440,65 @@ const styles = StyleSheet.create({
         color: theme.colors.text.secondary,
         lineHeight: 20,
         marginBottom: theme.spacing.xs,
+    },
+    manualContainer: {
+        marginTop: 30,
+        width: '100%',
+        backgroundColor: theme.colors.background.tertiary,
+        padding: theme.spacing.l,
+        borderRadius: 20,
+        alignItems: 'center',
+    },
+    manualTitle: {
+        fontSize: 18,
+        color: theme.colors.text.primary,
+        fontWeight: 'bold',
+        marginBottom: theme.spacing.m,
+    },
+    linkButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: theme.spacing.l,
+    },
+    linkButtonText: {
+        color: theme.colors.accent.pop,
+        fontSize: 14,
+        fontWeight: 'bold',
+        marginLeft: 8,
+        textDecorationLine: 'underline',
+    },
+    manualActions: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginBottom: theme.spacing.l,
+    },
+    actionButton: {
+        backgroundColor: theme.colors.background.secondary,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: theme.colors.accent.teal,
+        width: '48%',
+        alignItems: 'center',
+    },
+    actionButtonText: {
+        color: theme.colors.text.primary,
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    retryButton: {
+        backgroundColor: theme.colors.accent.teal,
+        paddingVertical: 14,
+        paddingHorizontal: 30,
+        borderRadius: 25,
+        width: '100%',
+        alignItems: 'center',
+    },
+    retryButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
