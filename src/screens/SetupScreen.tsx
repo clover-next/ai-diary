@@ -28,10 +28,10 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
             currentProgress += 0.05;
             setProgress(currentProgress);
 
-            if (currentProgress < 0.3) setLoadingText('オンデバイスAIを準備中...');
-            else if (currentProgress < 0.6) setLoadingText('Qwen3-TTS 0.6B をダウンロード中...');
-            else if (currentProgress < 0.9) setLoadingText('ローカル推論エンジンを設定中...');
-            else setLoadingText('まもなく完了します...');
+            if (currentProgress < 0.25) setLoadingText('オンデバイスAIを準備中...');
+            else if (currentProgress < 0.5) setLoadingText('Gemma-3 1B (推論エンジン) を展開中...');
+            else if (currentProgress < 0.75) setLoadingText('Qwen3-TTS 0.6B (音声モデル) をロード中...');
+            else setLoadingText('ローカル推論システムを最適化中...');
 
             if (currentProgress >= 1) {
                 clearInterval(interval);
@@ -134,8 +134,9 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
                                 プライバシーが完全に保護されています。
                             </Text>
                             <Text style={styles.infoBoxText}>
-                                モデル: Qwen3-TTS 0.6B{'\n'}
-                                メモリ: 約600MB (超軽量)
+                                推論: Gemma-3 1B (INT4){'\n'}
+                                音声: Qwen3-TTS 0.6B (Ono_Anna){'\n'}
+                                合計メモリ: 約1.2GB (超軽量)
                             </Text>
                         </View>
                     </View>

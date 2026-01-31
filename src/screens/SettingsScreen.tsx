@@ -161,7 +161,7 @@ export const SettingsScreen = () => {
             <InfoModal
                 visible={showAIDetails}
                 title="AIエンジンについて"
-                content="本アプリはGoogleの最新・最軽量LLM『Gemma-3 1B (4-bit INT4)』をデバイス上で実行しています。メモリ負荷を約900MB以下に抑えながら、高度な対話を実現しています。すべての処理はスマホ内部で完結するため、非常に高速かつ安全です。"
+                content="本アプリは、Googleの最新LLM『Gemma-3 1B』と、Alibabaの高性能音声合成モデル『Qwen3-TTS 0.6B』のデュアル構成で動作しています。Gemmaが思考を、Qwenが声を担当し、すべての処理はスマホ端末内で完結します。プライバシーを完全に守りながら、人間のように自然に対話することが可能です。"
                 onClose={() => setShowAIDetails(false)}
             />
 

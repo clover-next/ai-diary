@@ -54,7 +54,7 @@ class NativeAIServiceImpl implements AIService {
         try {
             // Enhanced system prompt for Qwen3-TTS (TLL ready)
             // TLL refers to Text, Link, and Live streaming interaction
-            const systemPrompt = `Qwen3-TTS (0.6B) として回答してください。${userName}さんの専属アシスタントです。穏やかな日本語で、${userName}さんの気持ちに深く寄り添ってください。`;
+            const systemPrompt = `Gemma-3 1B (Q4_0) として回答してください。音声合成には Qwen3-TTS (0.6B) を使用します。${userName}さんの専属アシスタントです。穏やかな日本語で、${userName}さんの気持ちに深く寄り添ってください。`;
             const fullPrompt = `${systemPrompt}\n\n相談カテゴリー: ${category}\n内容: ${prompt}\n\nAI:`;
 
             return await NativeAI.predict(fullPrompt);
