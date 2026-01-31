@@ -76,11 +76,9 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
             if (!ttsSuccess) throw new Error('TTSのダウンロードに失敗しました');
 
             setLoadingText('システムを初期化中...');
-            // Initialize main model
+            // Initialize both models
             await aiService.loadModel(llmFileUri);
-
-            // NOTE: If AIService supports loading multiple models, call it here for TTS too.
-            // For now, we ensure both are physically present.
+            await aiService.loadTTSModel(ttsFileUri);
 
             saveName(userName);
             saveVoice(selectedVoice);

@@ -5,6 +5,7 @@ const { LlamaAI } = NativeModules;
 export interface AIService {
     generateResponse(prompt: string, category: string, userName?: string): Promise<string>;
     loadModel(path: string): Promise<boolean>;
+    loadTTSModel(path: string): Promise<boolean>;
 }
 
 /**
@@ -12,7 +13,11 @@ export interface AIService {
  */
 class MockAIService implements AIService {
     async loadModel(path: string): Promise<boolean> {
-        console.log("Mock: Model loaded from", path);
+        console.log("Mock: LLM Model loaded from", path);
+        return true;
+    }
+    async loadTTSModel(path: string): Promise<boolean> {
+        console.log("Mock: TTS Model loaded from", path);
         return true;
     }
     async generateResponse(prompt: string, category: string, userName: string = 'あなた'): Promise<string> {
