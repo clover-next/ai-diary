@@ -30,7 +30,8 @@
     "plugins": [
       "expo-sqlite",
       "expo-build-properties",
-      "expo-font"
+      "expo-font",
+      "@react-native-voice/voice"
     ],
     "extra": {
       "eas": {

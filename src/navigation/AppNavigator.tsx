@@ -28,6 +28,7 @@ export type RootStackParamList = {
 export type TabParamList = {
     Home: undefined;
     Consultation: undefined;
+    Voice: undefined;
     History: undefined;
     Settings: undefined;
 };
@@ -52,6 +53,7 @@ const TabNavigator = () => {
                     let iconName: any;
                     if (route.name === 'Home') iconName = 'book';
                     else if (route.name === 'Consultation') iconName = 'psychology';
+                    else if (route.name === 'Voice') iconName = 'call';
                     else if (route.name === 'History') iconName = 'history';
                     else if (route.name === 'Settings') iconName = 'settings';
                     return <MaterialIcons name={iconName} size={size + 4} color={color} />;
@@ -60,6 +62,7 @@ const TabNavigator = () => {
         >
             <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: '記録' }} />
             <Tab.Screen name="Consultation" component={ConsultationScreen} options={{ tabBarLabel: '相談' }} />
+            <Tab.Screen name="Voice" component={VoiceCallScreen} options={{ tabBarLabel: '通話' }} />
             <Tab.Screen name="History" component={HistoryScreen} options={{ tabBarLabel: '履歴' }} />
             <Tab.Screen name="Settings" component={SettingsScreen} options={{ tabBarLabel: '設定' }} />
         </Tab.Navigator>
