@@ -1,12 +1,10 @@
 #include <jni.h>
 #include <string>
 
-// Fallback macros for IDEs that cannot find jni.h during static analysis.
-// These do not affect the actual Android build process.
+// Fallback macros for IDEs that cannot find jni.h during static
+// analysis. These do not affect the actual Android build process.
 #ifndef JNIEXPORT
 #define JNIEXPORT
-#endif
-#ifndef JNICALL
 #define JNICALL
 #endif
 
