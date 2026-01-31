@@ -4,7 +4,8 @@ import { theme } from '../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAppStore } from '../store/useAppStore';
-import * as FileSystem from 'expo-file-system';
+import { useAppStore } from '../store/useAppStore';
+import { documentDirectory, cacheDirectory, createDownloadResumable, getInfoAsync } from 'expo-file-system';
 import { aiService } from '../services/AIService';
 
 const VOICES = [
@@ -29,12 +30,24 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
         setIsDownloading(true);
 
         const MODEL_URL = 'https://huggingface.co/lmstudio-community/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf';
-        const dir = FileSystem.documentDirectory || FileSystem.cacheDirectory;
-        const fileUri = dir + (dir?.endsWith('/') ? '' : '/') + 'model.gguf';
+        const dir = documentDirectory || cacheDirectory || '';
+        const fileUri = dir + (dir.endsWith('/') ? '' : '/') + 'model.gguf';
 
         try {
+            // First check if file already exists (Manual Bundling Support)
+            const info = await getInfoAsync(fileUri);
+            if (info.exists) {
+                setLoadingText('モデルファイルを検出しました。初期化中...');
+                await aiService.loadModel(fileUri);
+                saveName(userName);
+                saveVoice(selectedVoice);
+                setHasCompletedSetup(true);
+                setTimeout(onComplete, 1000);
+                return;
+            }
+
             console.log("Starting download to:", fileUri);
-            const downloadResumable = FileSystem.createDownloadResumable(
+            const downloadResumable = createDownloadResumable(
                 MODEL_URL,
                 fileUri,
                 {
@@ -71,7 +84,7 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
         } catch (e: any) {
             console.error("Download error:", e);
             const errorMsg = e.message || 'Unknown error';
-            setLoadingText(`エラー: ${errorMsg}\nネットワークと空き容量を確認してください。`);
+            setLoadingText(`エラー: ${errorMsg}\n\n手動で配置する場合は以下へ保存してください:\n${fileUri}`);
         } finally {
             setIsDownloading(false);
         }
