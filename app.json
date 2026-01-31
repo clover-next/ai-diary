@@ -16,9 +16,9 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.clovernext.WordlessDiary",
+      "package": "com.clover-next.aidiary",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo.jpg",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
