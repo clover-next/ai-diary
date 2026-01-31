@@ -1,3 +1,9 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, TextInput } from 'react-native';
+import { theme } from '../theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
+
 import { useAppStore } from '../store/useAppStore';
 import * as FileSystem from 'expo-file-system';
 import { aiService } from '../services/AIService';
@@ -24,7 +30,7 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
         setIsDownloading(true);
 
         const MODEL_URL = 'https://huggingface.co/lmstudio-community/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf';
-        const dir = FileSystem.documentDirectory || FileSystem.cacheDirectory || '';
+        const dir = (FileSystem as any).documentDirectory || (FileSystem as any).cacheDirectory || '';
         const fileUri = dir + (dir.endsWith('/') ? '' : '/') + 'model.gguf';
 
         try {
