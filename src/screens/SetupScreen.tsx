@@ -20,6 +20,7 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
     const [selectedVoice, setSelectedVoice] = useState('anna');
     const [progress, setProgress] = useState(0);
     const [loadingText, setLoadingText] = useState('準備中...');
+    const [isDownloading, setIsDownloading] = useState(false);
 
     const fadeAnim = new Animated.Value(1);
 
@@ -36,13 +37,18 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
                 fileUri,
                 {},
                 (downloadProgress) => {
-                    const prog = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
-                    setProgress(prog);
+                    if (downloadProgress.totalBytesExpectedToWrite > 0) {
+                        const prog = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
+                        setProgress(prog);
 
-                    if (prog < 0.25) setLoadingText('通信を確立中...');
-                    else if (prog < 0.5) setLoadingText('Gemma-3 1B モデルをダウンロード中...');
-                    else if (prog < 0.9) setLoadingText('ローカル推論エンジンを最適化中...');
-                    else setLoadingText('まもなく完了します...');
+                        if (prog < 0.25) setLoadingText('通信を確立中...');
+                        else if (prog < 0.5) setLoadingText('Gemma-3 1B モデルをダウンロード中...');
+                        else if (prog < 0.9) setLoadingText('ローカル推論エンジンを最適化中...');
+                        else setLoadingText('まもなく完了します...');
+                    } else {
+                        // If Content-Length is missing or 0, just update progress as "indeterminate" or based on bytes written
+                        setLoadingText(`ダウンロード中... (${(downloadProgress.totalBytesWritten / 1024 / 1024).toFixed(1)} MB)`);
+                    }
                 }
             );
 

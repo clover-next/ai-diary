@@ -16,12 +16,7 @@ class MockAIService implements AIService {
         return true;
     }
     async generateResponse(prompt: string, category: string, userName: string = 'あなた'): Promise<string> {
-        // ... (existing mock responses)
         // Simulate network/inference delay
-        // The following lines appear to be React hooks/APIs and are not valid in this class method context.
-        // They have been inserted as requested, but please note this will cause a syntax error or runtime error.
-        const [isDownloading, setIsDownloading] = useState(false);
-        const fadeAnim = new Animated.Value(1);
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         const responses: { [key: string]: string[] } = {
