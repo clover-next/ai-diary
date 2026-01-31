@@ -4,6 +4,8 @@ import { theme } from '../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAppStore } from '../store/useAppStore';
+import * as FileSystem from 'expo-file-system';
+import { aiService } from '../services/AIService';
 
 const VOICES = [
     { id: 'anna', name: 'アンナ (Anna)', desc: '明るく遊び心のある声', color: '#FF7E5F' },
@@ -21,26 +23,46 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
 
     const fadeAnim = new Animated.Value(1);
 
-    const startDownload = () => {
+    const startDownload = async () => {
         setStep(2);
-        let currentProgress = 0;
-        const interval = setInterval(() => {
-            currentProgress += 0.05;
-            setProgress(currentProgress);
+        setIsDownloading(true);
 
-            if (currentProgress < 0.25) setLoadingText('オンデバイスAIを準備中...');
-            else if (currentProgress < 0.5) setLoadingText('Gemma-3 1B (推論エンジン) を展開中...');
-            else if (currentProgress < 0.75) setLoadingText('Qwen3-TTS 0.6B (音声モデル) をロード中...');
-            else setLoadingText('ローカル推論システムを最適化中...');
+        const MODEL_URL = 'https://huggingface.co/lmstudio-community/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf';
+        const fileUri = `${FileSystem.documentDirectory}model.gguf`;
 
-            if (currentProgress >= 1) {
-                clearInterval(interval);
+        try {
+            const downloadResumable = FileSystem.createDownloadResumable(
+                MODEL_URL,
+                fileUri,
+                {},
+                (downloadProgress) => {
+                    const prog = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
+                    setProgress(prog);
+
+                    if (prog < 0.25) setLoadingText('通信を確立中...');
+                    else if (prog < 0.5) setLoadingText('Gemma-3 1B モデルをダウンロード中...');
+                    else if (prog < 0.9) setLoadingText('ローカル推論エンジンを最適化中...');
+                    else setLoadingText('まもなく完了します...');
+                }
+            );
+
+            const result = await downloadResumable.downloadAsync();
+
+            if (result) {
+                setLoadingText('推論エンジンを初期化中...');
+                await aiService.loadModel(result.uri);
+
                 saveName(userName);
                 saveVoice(selectedVoice);
                 setHasCompletedSetup(true);
                 setTimeout(onComplete, 1000);
             }
-        }, 300);
+        } catch (e) {
+            console.error("Download error:", e);
+            setLoadingText('エラーが発生しました。ネットワークを確認してください。');
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     return (

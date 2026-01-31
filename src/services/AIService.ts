@@ -1,18 +1,22 @@
 import { NativeModules } from 'react-native';
 
-const { LlamaContext } = NativeModules;
-const { NativeAI } = NativeModules;
+const { LlamaAI } = NativeModules;
 
 export interface AIService {
     generateResponse(prompt: string, category: string, userName?: string): Promise<string>;
+    loadModel(path: string): Promise<boolean>;
 }
 
 /**
- * Qwen3-TTS (Ono_Anna) inspired Mock Service.
- * Playful, human-like, yet quiet and objective observations.
+ * Fallback Mock Service for development/non-native environment.
  */
 class MockAIService implements AIService {
+    async loadModel(path: string): Promise<boolean> {
+        console.log("Mock: Model loaded from", path);
+        return true;
+    }
     async generateResponse(prompt: string, category: string, userName: string = 'あなた'): Promise<string> {
+        // ... (existing mock responses)
         // Simulate network/inference delay
         await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -48,16 +52,20 @@ class MockAIService implements AIService {
 }
 
 class NativeAIServiceImpl implements AIService {
+    async loadModel(path: string): Promise<boolean> {
+        if (!LlamaAI) return true;
+        return await LlamaAI.loadModel(path);
+    }
+
     async generateResponse(prompt: string, category: string, userName: string = 'あなた'): Promise<string> {
-        if (!NativeAI) return new MockAIService().generateResponse(prompt, category, userName);
+        if (!LlamaAI) return new MockAIService().generateResponse(prompt, category, userName);
 
         try {
-            // Enhanced system prompt for Qwen3-TTS (TLL ready)
-            // TLL refers to Text, Link, and Live streaming interaction
+            // Enhanced system prompt for Gemma-3 / Qwen3-TTS
             const systemPrompt = `Gemma-3 1B (Q4_0) として回答してください。音声合成には Qwen3-TTS (0.6B) を使用します。${userName}さんの専属アシスタントです。穏やかな日本語で、${userName}さんの気持ちに深く寄り添ってください。`;
             const fullPrompt = `${systemPrompt}\n\n相談カテゴリー: ${category}\n内容: ${prompt}\n\nAI:`;
 
-            return await NativeAI.predict(fullPrompt);
+            return await LlamaAI.predict(fullPrompt);
         } catch (e) {
             console.error("AI inference error:", e);
             return "申し訳ありません、考えをまとめるのに少し時間がかかりそうです。";
@@ -65,4 +73,4 @@ class NativeAIServiceImpl implements AIService {
     }
 }
 
-export const aiService = NativeAI ? new NativeAIServiceImpl() : new MockAIService();
+export const aiService = LlamaAI ? new NativeAIServiceImpl() : new MockAIService();
