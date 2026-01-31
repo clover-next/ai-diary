@@ -5,8 +5,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import { useAppStore } from '../store/useAppStore';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { aiService } from '../services/AIService';
+
+// Fallback for directory if documentDirectory is null/undefined
+const getDocumentDir = () => {
+    return FileSystem.documentDirectory || FileSystem.cacheDirectory || 'files/';
+};
 
 const VOICES = [
     { id: 'anna', name: 'アンナ (Anna)', desc: '明るく遊び心のある声', color: '#FF7E5F' },
@@ -33,7 +38,7 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
         const LLM_MODEL_URL = 'https://github.com/clover-next/ai-diary/releases/download/ai-models/llm_model.gguf';
         const TTS_MODEL_URL = 'https://github.com/clover-next/ai-diary/releases/download/ai-models/tts_model.gguf';
 
-        const dir = (FileSystem as any).documentDirectory || (FileSystem as any).cacheDirectory || '';
+        const dir = getDocumentDir();
         const llmFileUri = dir + (dir.endsWith('/') ? '' : '/') + 'llm_model.gguf';
         const ttsFileUri = dir + (dir.endsWith('/') ? '' : '/') + 'tts_model.gguf';
 
@@ -48,7 +53,7 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
             const downloadResumable = FileSystem.createDownloadResumable(
                 url,
                 fileUri,
-                { headers: { 'User-Agent': 'WordlessDiary-App/1.0' } },
+                { headers: { 'User-Agent': 'AI-Diary-App/1.0' } },
                 (downloadProgress) => {
                     const total = downloadProgress.totalBytesExpectedToWrite;
                     if (total > 0) {
@@ -88,7 +93,10 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
         } catch (e: any) {
             console.error("Download error:", e);
             const errorMsg = e.message || 'Unknown error';
-            setLoadingText(`エラー: ${errorMsg}\n\n手動で配置する場合は以下へ保存してください:\n1. ${llmFileUri}\n2. ${ttsFileUri}`);
+
+            // Helpful message for manual placement
+            const manualPath = llmFileUri.replace('file://', '');
+            setLoadingText(`エラー: ${errorMsg}\n\n【手動解決】PCからモデルを配置する場合、以下の場所（またはアプリ専用フォルダ）にファイルをコピーしてください：\n\n1. llm_model.gguf\n2. tts_model.gguf\n\n保存先目安: ${manualPath}`);
         } finally {
             setIsDownloading(false);
         }
