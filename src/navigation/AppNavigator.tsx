@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../theme';
 import { initDB } from '../db';
+import { useAppStore } from '../store/useAppStore';
 
 // Screens
 import {
@@ -12,12 +13,16 @@ import {
     ReflectionScreen,
     ConsultationScreen,
     HistoryScreen,
-    SettingsScreen
+    SettingsScreen,
+    SetupScreen,
+    VoiceCallScreen
 } from '../screens';
 
 export type RootStackParamList = {
     Main: undefined;
-    Reflection: { consultationId?: string };
+    Reflection: { consultationId?: string; notes?: string; category?: string };
+    Setup: undefined;
+    VoiceCall: { voice?: string };
 };
 
 export type TabParamList = {
@@ -62,19 +67,43 @@ const TabNavigator = () => {
 }
 
 export const AppNavigator = () => {
+    const { hasCompletedSetup } = useAppStore();
+    const [isAppReady, setIsAppReady] = useState(false);
+
     useEffect(() => {
         initDB();
+        setIsAppReady(true);
     }, []);
+
+    if (!isAppReady) return null;
 
     return (
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="Main" component={TabNavigator} />
-                <Stack.Screen
-                    name="Reflection"
-                    component={ReflectionScreen}
-                    options={{ presentation: 'modal' }}
-                />
+                {!hasCompletedSetup ? (
+                    <Stack.Screen name="Setup" component={SetupScreen} />
+                ) : (
+                    <>
+                        <Stack.Screen name="Main" component={TabNavigator} />
+                        <Stack.Screen
+                            name="Reflection"
+                            component={ReflectionScreen}
+                            options={{
+                                presentation: 'modal',
+                                cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS
+                            }}
+                        />
+                        <Stack.Screen
+                            name="VoiceCall"
+                            component={VoiceCallScreen}
+                            options={{
+                                presentation: 'modal',
+                                gestureEnabled: false,
+                                cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS
+                            }}
+                        />
+                    </>
+                )}
             </Stack.Navigator>
         </NavigationContainer>
     );

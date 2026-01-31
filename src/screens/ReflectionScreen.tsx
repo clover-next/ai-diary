@@ -1,70 +1,111 @@
+```javascript
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { theme } from '../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { aiService } from '../services/AIService';
 import * as Speech from 'expo-speech';
 import { StatusBar } from 'expo-status-bar';
 
-type ReflectionRouteProp = RouteProp<RootStackParamList, 'Reflection'>;
-
-export const ReflectionScreen = () => {
-    const route = useRoute<ReflectionRouteProp>();
-    const navigation = useNavigation();
+export const ReflectionScreen = ({ navigation, route }: any) => {
     const [response, setResponse] = useState('');
     const [displayBuffer, setDisplayBuffer] = useState('');
     const [loading, setLoading] = useState(true);
     const [speaking, setSpeaking] = useState(false);
+    const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+    const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         generateReflection();
         return () => {
+            if (typingIntervalRef.current) {
+                clearInterval(typingIntervalRef.current);
+            }
             Speech.stop();
         };
     }, []);
 
     const generateReflection = async () => {
         setLoading(true);
-        // Prompt for the AI (Context can be fetched from DB via consultationId)
-        const prompt = "私は今、少し不安を感じています。";
-        const result = await aiService.reflect(prompt);
-        setResponse(result);
-        setLoading(false);
-        startTyping(result);
+        try {
+            const result = await aiService.generateResponse(
+                route.params.notes || '今日を振り返りたい',
+                route.params.category || '全般',
+                'ユーザー' // This should come from a store like Zustand
+            );
+            setResponse(result);
+            startTyping(result);
+        } catch (error) {
+            console.error("Error generating reflection:", error);
+            setResponse("申し訳ありませんが、振り返りを生成できませんでした。");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const startTyping = (fullText: string) => {
         let index = 0;
         setDisplayBuffer('');
+        if (typingIntervalRef.current) {
+            clearInterval(typingIntervalRef.current);
+        }
 
-        const interval = setInterval(() => {
+        typingIntervalRef.current = setInterval(() => {
             if (index < fullText.length) {
                 setDisplayBuffer(prev => prev + fullText.charAt(index));
                 index++;
             } else {
-                clearInterval(interval);
+                if (typingIntervalRef.current) {
+                    clearInterval(typingIntervalRef.current);
+                }
+                // Automatically start speech after typing is complete
                 handleSpeech(fullText);
             }
         }, 80);
     };
 
-    const handleSpeech = (text: string) => {
-        // Find best Japanese voice
-        Speech.getAvailableVoicesAsync().then(voices => {
-            const jpVoice = voices.find(v => v.language.includes('ja')) || voices[0];
+    const handleSpeech = async (text: string) => {
+        const isSpeakingNow = await Speech.isSpeakingAsync();
+        if (isSpeakingNow) {
+            Speech.stop();
+            setIsAudioPlaying(false);
+            return;
+        }
 
-            Speech.speak(text, {
-                voice: jpVoice?.identifier,
-                language: 'ja-JP',
-                pitch: 1.0,  // Standard pitch for more human feel
-                rate: 0.9,   // Slightly slower for clarity and calmness
-                onStart: () => setSpeaking(true),
-                onDone: () => setSpeaking(false),
-                onStopped: () => setSpeaking(false),
-            });
+        // Find best Japanese voice
+        const voices = await Speech.getAvailableVoicesAsync();
+        const jpVoice = voices.find(v => v.language.includes('ja')) || voices[0];
+
+        Speech.speak(text, {
+            voice: jpVoice?.identifier,
+            language: 'ja-JP',
+            pitch: 1.0,  // Standard pitch for more human feel
+            rate: 0.9,   // Slightly slower for clarity and calmness
+            onStart: () => {
+                setSpeaking(true);
+                setIsAudioPlaying(true);
+            },
+            onDone: () => {
+                setSpeaking(false);
+                setIsAudioPlaying(false);
+            },
+            onStopped: () => {
+                setSpeaking(false);
+                setIsAudioPlaying(false);
+            },
+            onError: () => {
+                setSpeaking(false);
+                setIsAudioPlaying(false);
+            }
         });
+    };
+
+    const toggleAudio = () => {
+        if (response) {
+            handleSpeech(response);
+        }
     };
 
     return (
@@ -82,12 +123,28 @@ export const ReflectionScreen = () => {
                 </View>
 
                 {!loading && (
-                    <TouchableOpacity
-                        style={styles.closeButton}
-                        onPress={() => navigation.goBack()}
-                    >
-                        <Text style={styles.closeText}>戻る</Text>
-                    </TouchableOpacity>
+                    <>
+                        <View style={styles.buttonRow}>
+                            <TouchableOpacity style={styles.actionButton} onPress={toggleAudio}>
+                                <MaterialIcons name={isAudioPlaying ? "pause" : "play-arrow"} size={24} color="#fff" />
+                                <Text style={styles.buttonText}>{isAudioPlaying ? "停止" : "読み上げ"}</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity 
+                                style={[styles.actionButton, styles.callButton]} 
+                                onPress={() => navigation.navigate('VoiceCall', { voice: 'Anna' })}
+                            >
+                                <MaterialIcons name="call" size={24} color="#fff" />
+                                <Text style={styles.buttonText}>通話で相談</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => navigation.goBack()}
+                        >
+                            <Text style={styles.closeText}>戻る</Text>
+                        </TouchableOpacity>
+                    </>
                 )}
             </View>
         </SafeAreaView>

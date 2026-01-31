@@ -3,3 +3,5 @@ export * from './HistoryScreen';
 export * from './ConsultationScreen';
 export * from './ReflectionScreen';
 export * from './SettingsScreen';
+export * from './SetupScreen';
+export * from './VoiceCallScreen';
