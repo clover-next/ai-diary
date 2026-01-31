@@ -38,7 +38,7 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
             setProgress(currentProgress);
 
             if (currentProgress < 0.3) setLoadingText('AIモデル構成を読み込み中...');
-            else if (currentProgress < 0.6) setLoadingText('Gemma-3 1B (Google AI) を展開中...');
+            else if (currentProgress < 0.6) setLoadingText('Qwen3-TTS 0.6B (TLL) を展開中...');
             else if (currentProgress < 0.9) setLoadingText('音声エンジンを設定中...');
             else setLoadingText('まもなく完了します...');
 
@@ -82,21 +82,6 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
                 ) : step === 1 ? (
                     <>
                         <Text style={styles.title}>{userName}さん、こんにちは</Text>
-                        <View style={styles.downloadProgressContainer}>
-                            <Text style={styles.downloadStatus}>
-                                {progress < 1 ? 'Qwen3-TTS 0.6B (TLL) モデルをダウンロード中...' : '初期化完了'}
-                            </Text>
-                            <View style={styles.progressBarBg}>
-                                <Animated.View
-                                    style={[
-                                        styles.progressBarFill,
-                                        { width: `${progress * 100}%` }
-                                    ]}
-                                />
-                            </View>
-                            <Text style={styles.downloadPercentage}>{Math.round(progress * 100)}%</Text>
-                            <Text style={styles.latencyNote}>超低遅延 (97ms) エンジンを最適化しています...</Text>
-                        </View>
                         <Text style={styles.subtitle}>あなたに寄り添うAIの「声」を選んでください。</Text>
 
                         <View style={styles.voiceGrid}>
@@ -136,8 +121,8 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
                         <Text style={styles.percentage}>{Math.round(progress * 100)}%</Text>
 
                         <Text style={styles.hint}>
-                            ※この操作は最初の一回だけ必要です。
-                            モデル: Gemma-3 1B / メモリ負荷: 約892MB (超軽量)
+                            ※この操作は最初の一回だけ必要です。{'\n'}
+                            モデル: Qwen3-TTS 0.6B / メモリ負荷: 約600MB (超軽量)
                         </Text>
                     </View>
                 )}
