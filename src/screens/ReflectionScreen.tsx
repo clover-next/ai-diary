@@ -1,4 +1,3 @@
-```javascript
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { theme } from '../theme';
@@ -130,8 +129,8 @@ export const ReflectionScreen = ({ navigation, route }: any) => {
                                 <Text style={styles.buttonText}>{isAudioPlaying ? "停止" : "読み上げ"}</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity 
-                                style={[styles.actionButton, styles.callButton]} 
+                            <TouchableOpacity
+                                style={[styles.actionButton, styles.callButton]}
                                 onPress={() => navigation.navigate('VoiceCall', { voice: 'Anna' })}
                             >
                                 <MaterialIcons name="call" size={24} color="#fff" />

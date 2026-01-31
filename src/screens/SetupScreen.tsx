@@ -83,17 +83,17 @@ export const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
                         <Text style={styles.title}>{userName}さん、こんにちは</Text>
                         <View style={styles.downloadProgressContainer}>
                             <Text style={styles.downloadStatus}>
-                                {downloadProgress < 100 ? 'Qwen3-TTS 0.6B (TLL) モデルをダウンロード中...' : '初期化完了'}
+                                {progress < 1 ? 'Qwen3-TTS 0.6B (TLL) モデルをダウンロード中...' : '初期化完了'}
                             </Text>
                             <View style={styles.progressBarBg}>
                                 <Animated.View
                                     style={[
                                         styles.progressBarFill,
-                                        { width: `${downloadProgress}%` }
+                                        { width: `${progress * 100}%` }
                                     ]}
                                 />
                             </View>
-                            <Text style={styles.downloadPercentage}>{Math.round(downloadProgress)}%</Text>
+                            <Text style={styles.downloadPercentage}>{Math.round(progress * 100)}%</Text>
                             <Text style={styles.latencyNote}>超低遅延 (97ms) エンジンを最適化しています...</Text>
                         </View>
                         <Text style={styles.subtitle}>あなたに寄り添うAIの「声」を選んでください。</Text>
@@ -269,15 +269,38 @@ const styles = StyleSheet.create({
         color: theme.colors.text.primary,
         fontWeight: 'bold',
     },
+    downloadProgressContainer: {
+        width: '100%',
+        backgroundColor: 'rgba(0, 210, 255, 0.05)',
+        padding: 15,
+        borderRadius: 15,
+        marginBottom: 20,
+    },
+    downloadStatus: {
+        fontSize: 12,
+        color: theme.colors.text.secondary,
+        textAlign: 'center',
+        marginBottom: 10,
+    },
+    progressBarBg: {
+        height: 8,
+        backgroundColor: theme.colors.background.tertiary,
+        borderRadius: 4,
+        overflow: 'hidden',
+    },
+    progressBarFill: {
+        height: '100%',
+        backgroundColor: theme.colors.accent.teal,
+    },
     downloadPercentage: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: theme.colors.primary,
+        color: theme.colors.accent.teal,
         textAlign: 'center',
         marginTop: 8,
     },
     latencyNote: {
-        fontSize: 12,
+        fontSize: 10,
         color: theme.colors.text.muted,
         textAlign: 'center',
         marginTop: 4,
