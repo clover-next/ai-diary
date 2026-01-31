@@ -36,11 +36,6 @@ class LlamaAIModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     @ReactMethod
     fun predict(prompt: String, promise: Promise) {
         try {
-            // Run inference in a background thread to avoid blocking JS thread?
-            // For MVP, nativePredict might block, so we should be careful.
-            // React Native bridge methods are called on a background thread if using standard Module,
-            // but effectively we might want to ensure we don't block the UI.
-            // However, React Native modules usually run on a separate native module thread.
             val result = nativePredict(prompt)
             promise.resolve(result)
         } catch (e: Exception) {
