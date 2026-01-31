@@ -53,7 +53,7 @@ export const HomeScreen = () => {
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.header}>
                     <Image
-                        source={require('../../assets/images/header.png')}
+                        source={require('../../assets/images/header.jpg')}
                         style={styles.headerImage}
                         resizeMode="cover"
                     />

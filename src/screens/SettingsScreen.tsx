@@ -39,8 +39,9 @@ export const SettingsScreen = () => {
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <Image
-                    source={require('../../assets/images/logo.png')}
+                    source={require('../../assets/images/logo.jpg')}
                     style={styles.logo}
+                    resizeMode="contain"
                 />
                 <Text style={styles.title}>設定</Text>
             </View>
