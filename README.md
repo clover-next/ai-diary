@@ -96,6 +96,15 @@ setup_models.bat
 - 本アプリは医療機器ではなく、カウンセリングの代替を意図したものではありません。
 
 ---
+
+## 🔍 トラブルシューティング
+
+### ネイティブコード (`native-lib.cpp`) のエラーについて
+エディタ（VS Codeなど）で `native-lib.cpp` を開いた際、`'jni.h' file not found` や `Unknown type name 'JNIEnv'` といった赤線（エラー）が表示されることがあります。
+
+これは**エディタ側の設定（Android NDKへのパス）が不足しているため**であり、実際のビルド（EAS BuildやAndroid Studioでのビルド）には一切影響しません。コードは正常にコンパイルされますので、そのまま進めて問題ありません。
+
+---
 <p align="center">
   <b>Clover Next - 未来を拓く、穏やかなテクノロジー</b><br>
   Copyright © 2026 Clover Next All Rights Reserved.
