@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "WordlessDiary",
-    "slug": "WordlessDiary",
+    "name": "AI-Diary",
+    "slug": "AI-Diary",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -16,7 +16,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.clovernext.WordlessDiary",
+      "package": "com.clovernext.aidiary",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
